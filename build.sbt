@@ -1,13 +1,13 @@
 lazy val noIdea = project
-  .copy(id = "no-idea")
+  .copy(id = "Free-Monad")
   .in(file("."))
   .enablePlugins(AutomateHeaderPlugin, GitVersioning)
 
-name := "no-idea"
+name := "Free-Monad"
 
 libraryDependencies ++= Vector(
   Library.scalaCheck % "test"
 )
 
-initialCommands := """|import com.perevillega.no.idea._
+initialCommands := """|import com.perevillega.freemonad._
                       |""".stripMargin

@@ -1,4 +1,4 @@
-lazy val noIdea = project
+lazy val freeMonad = project
   .copy(id = "Free-Monad")
   .in(file("."))
   .enablePlugins(AutomateHeaderPlugin, GitVersioning)
@@ -6,8 +6,14 @@ lazy val noIdea = project
 name := "Free-Monad"
 
 libraryDependencies ++= Vector(
-  Library.scalaCheck % "test"
+  Library.cats,
+  Library.scalaCheck % "test",
+  Library.scalaTest % "test"
 )
 
 initialCommands := """|import com.perevillega.freemonad._
                       |""".stripMargin
+
+resolvers += Resolver.sonatypeRepo("releases")
+
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")

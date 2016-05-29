@@ -12,7 +12,7 @@ import cats.{Id, ~>}
 
 //Object Orders contains a Free Monad example with some comments to explain what are we doing as we go
 //Warning: this is not aimed to deep category theory knowledge, its focus is use cases
-object Orders {
+object Orders extends App {
   // Define some alias so the code looks more readable later
   type Symbol = String
   type Response = String
@@ -58,10 +58,13 @@ object Orders {
     rsp <- sell("GOOG", 200)
   } yield rsp
 
+  println(s"> Smart trade - see what program is compiled onto - $smartTrade")
+  println()
+
   // But this does nothing, by itself. We compile a for-comprehension, but it still has no logic associated
   // How to do something with it?
   // We need an interpreter that tells the code what to do. An interpreter is a natural transformation to Monad.
-  // Ignore `natural trasnformation`, it's not relevant right now, assume it's magic.
+  // Ignore `natural transformation`, it's not relevant right now, assume it's magic.
   // What is the simplest Monad we know of? Id Monad. So we'll use it.
   // Note: on each case we need to return an element of the type we expect as 'result', so `Response` or equivalent.
   def orderPrinter: Orders ~> Id =
@@ -81,7 +84,10 @@ object Orders {
       }
     }
 
-  // If we execute this code (see Main object) we will see the `println` output.
+  // If we execute this code we will see the `println` output.
+  println(s"> Smart trade - printer - ${smartTrade.foldMap(orderPrinter)}")
+  println()
+
   // Note that we decide what happens with our code inside the interpreter.
   // If you remember, you define the actions of a Monad in its flatMap method (intrinsic behaviour of the Monad).
   // Think of the interpreter (natural transformation) as something similar.
@@ -103,7 +109,9 @@ object Orders {
       }
     }
 
-  //If we execute this code (see Main object) we see it works and the for-comprehension fails on Sell (Xor.left as result)
+  //If we execute this code we see it works and the for-comprehension fails on Sell (Xor.left as result)
+  println(s"> Smart trade - xorInterpreter - ${smartTrade.foldMap(xorInterpreter)}")
+  println()
 
   // Let's extend our language by adding a new method `listStock` that returns `List[Stock]`
   // Implement case class and lift to Free
@@ -136,9 +144,14 @@ object Orders {
     rsp <- sell("GOOG", 100)
   } yield rsp
 
+  // See execution of our program
+  println(s"> Smart trade - smartTradeWithList - ${smartTradeWithList.foldMap(orderPrinter)}")
+  println()
+
   // ok, we have this working. Our DSL works and it uses a language that can be understood by business people
   // (you can add some method to hide the `traverseU` syntax if needed)
   // Beer time? :)
+
 
 
   // Let's grow our application a bit. If we want to go to production, we need to add Logs to it.
@@ -238,7 +251,10 @@ object Orders {
   // Note that although we are creating a new interpreter, we are reusing existing ones to do so!
   def composedInterpreter: TradeApp ~> Id = orderPrinter or logPrinter
 
-  // With this, we can run it. See Main object at the bottom of the file :)
+  // With this, we can run it :)
+  println(s"> Smart trade - smartTradeWithLogs - ${smartTradeWithLogs.foldMap(composedInterpreter)}")
+  println()
+
   // What have we achieved? We have mixed 2 different business languages into our program, each one with its own interpreter
   // We are reusing the interpreters defined for each individual language, so we have not increased the surface area
   // affected by implementation changes in an interpreter
@@ -308,7 +324,10 @@ object Orders {
     } yield rsp
   }
 
-  // If you run Main you'll see this works and we see the expected output.
+  // If you run it you'll see this works and we see the expected output.
+  println(s"> Smart trade - smartTradeWithAuditsAndLogs - ${smartTradeWithAuditsAndLogs.foldMap(auditableInterpreter)}")
+  println()
+
   // As you can see chaining several languages becomes slightly verbose (need to chain several CoProducts)
   // On the other hand, you have to define that only once, and hte interpreters are still using pre-existing
   // natural transformations, so it's another case of *define once, use many times*. And it works.
@@ -359,6 +378,10 @@ object Orders {
     payload <- subscribe("BBC", "Sherlock")
   } yield payload
 
+  // Let's test this new language works by itself
+  println(s"> Messaging layer - test messaging layer - ${testMessagingInterpreter.foldMap(messagingPrinter)}")
+  println()
+
   // So we have the language, now we want to force `Orders` to use this new language to define its behaviour. How can we?
   // Remember that a natural transformation is from a Monad F to a Monad G. And Free Monads are Monads.
   // So we can transform from one Free to another, via an interpreter!
@@ -382,6 +405,10 @@ object Orders {
       }
     }
 
+  // Let's test this interpreter with our oeiginal program (no logging nor audits)
+  println(s"> Smart trade - messaging Interpreter - ${smartTrade.foldMap(orderToMessageInterpreter)}")
+  println()
+
   // Now let's define a chain of interpreters for our Orders. We want to define a program that only uses Orders
   // (see `smartTrade` above, our first program) and we want our interpreters to display the process Orders -> Messaging -> Id
   //
@@ -398,8 +425,10 @@ object Orders {
   // This works, see example in Main object, below.
   def ordersToTerminalViaMessage: Orders ~> Id = orderToMessageInterpreter andThen messagingFreePrinter
 
+  // The above works, great. We can see the full output from Order to Terminal via Message Language
+  println(s"> Smart trade - messaging Interpreter + printer - ${smartTrade.foldMap(ordersToTerminalViaMessage)}")
+  println()
 
-  // The above works, great.
   // Now we want to build an interpreter from AuditableTradeApp to Id, which also uses the middle transformation from Orders to Messaging.
   // With this we will have everything we built above in use: 4 languages (Orders, Log, Audit, Messaging) and `Orders` implemented as
   // a series of `Messaging` actions (higher level defined as lower-level actions)
@@ -417,38 +446,13 @@ object Orders {
   // Given they are reusing existing interpreters via composition, this way doesn't sound like such a bad thing
   def auditableToTerminalViaMessage: AuditableTradeApp ~> Id = auditPrinter or composedViaMessageInterpreter
 
-  // And you can see this working in Main object, below.
+  // And you can see this working. Yay!
+  println(s"> Smart trade - smartTradeWithAuditsAndLogs + messaging Interpreter + printer - ${smartTradeWithAuditsAndLogs.foldMap(auditableToTerminalViaMessage)}")
+  println()
 
   // Ta-da!
   // With this we have the pieces we may need to use Free Monads to implement our business logic
   // Some steps may seem 'boilerplate', and they may be, but it's stuff that we define just once and we can reuse a lot.
   // In fact in this example, all our interpreters are built on top of the 3 basic ones, by composition.
   // This reduces the areas where we can introduce bugs and facilitates testing as well as replacing logic with minimal impact
-}
-
-
-// Below you can see use cases for all the different programs and interpreters built above
-object Main extends App {
-
-  import Orders._
-
-  println(s"> Smart trade - program - $smartTrade")
-  println()
-  println(s"> Smart trade - printer - ${smartTrade.foldMap(orderPrinter)}")
-  println(s"> Smart trade - xorInterpreter - ${smartTrade.foldMap(xorInterpreter)}")
-  println()
-  println(s"> Smart trade - smartTradeWithList - ${smartTradeWithList.foldMap(orderPrinter)}")
-  println()
-  println(s"> Smart trade - smartTradeWithLogs - ${smartTradeWithLogs.foldMap(composedInterpreter)}")
-  println()
-  println(s"> Smart trade - smartTradeWithAuditsAndLogs - ${smartTradeWithAuditsAndLogs.foldMap(auditableInterpreter)}")
-  println()
-  println(s"> Messaging layer - test messaging layer - ${testMessagingInterpreter.foldMap(messagingPrinter)}")
-  println()
-  println(s"> Smart trade - messaging Interpreter - ${smartTrade.foldMap(orderToMessageInterpreter)}")
-  println()
-  println(s"> Smart trade - messaging Interpreter + printer - ${smartTrade.foldMap(ordersToTerminalViaMessage)}")
-  println()
-  println(s"> Smart trade - smartTradeWithAuditsAndLogs + messaging Interpreter + printer - ${smartTradeWithAuditsAndLogs.foldMap(auditableToTerminalViaMessage)}")
-  println()
 }

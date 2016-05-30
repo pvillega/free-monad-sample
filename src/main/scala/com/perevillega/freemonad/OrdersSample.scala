@@ -1,18 +1,34 @@
+/*
+ * Copyright 2016 Pere Villega
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.perevillega.freemonad
 
 import java.util.UUID
 
-import cats.data.{Coproduct, Xor}
+import cats.data.{ Coproduct, Xor }
 import cats.free.Free._
-import cats.free.{Free, Inject}
+import cats.free.{ Free, Inject }
 import cats.std.list._
 import cats.syntax.traverse._
 import cats.syntax.xor._
-import cats.{Id, ~>}
+import cats.{ Id, ~> }
 
 //Object Orders contains a Free Monad example with some comments to explain what are we doing as we go
 //Warning: this is not aimed to deep category theory knowledge, its focus is use cases
-object Orders extends App {
+object OrdersSample extends App {
   // Define some alias so the code looks more readable later
   type Symbol = String
   type Response = String
@@ -152,8 +168,6 @@ object Orders extends App {
   // (you can add some method to hide the `traverseU` syntax if needed)
   // Beer time? :)
 
-
-
   // Let's grow our application a bit. If we want to go to production, we need to add Logs to it.
   // But logging, that's a second language completely different than `Orders`!
   // Let's define it:
@@ -238,7 +252,7 @@ object Orders extends App {
   def logPrinter: Log ~> Id =
     new (Log ~> Id) {
       def apply[A](fa: Log[A]): Id[A] = fa match {
-        case Info(msg) => println(s"[Info] - $msg")
+        case Info(msg)  => println(s"[Info] - $msg")
         case Error(msg) => println(s"[Error] - $msg")
       }
     }
@@ -282,7 +296,7 @@ object Orders extends App {
   def auditPrinter: Audit ~> Id =
     new (Audit ~> Id) {
       def apply[A](fa: Audit[A]): Id[A] = fa match {
-        case UserActionAudit(user, action, values) => println(s"[USER Action] - user $user called $action with values $values")
+        case UserActionAudit(user, action, values)  => println(s"[USER Action] - user $user called $action with values $values")
         case SystemActionAudit(job, action, values) => println(s"[SYSTEM Action] - $job called $action with values $values")
       }
     }
@@ -391,7 +405,7 @@ object Orders extends App {
       def apply[A](fa: Orders[A]): MessagingF[A] = {
         fa match {
           case ListStocks() =>
-            // yes, we cna use a for-comprehension inside the natural transformation if our interpreter requires
+            // yes, we can use a for-comprehension inside the natural transformation if our interpreter requires
             // several steps. It works :)
             for {
               _ <- publish("001", "Orders", UUID.randomUUID().toString, "Get Stocks List")

@@ -161,12 +161,12 @@ object FreeKSample extends App {
     // This hides all the boilerplate code we had to create in `OrdersSample.scala` to generate Free we could compose
     val program: Free[PRG, Response] = for {
       _ <- Info("I'm going to trade smartly").freek[PRG]
-      _ <- UserAction("ID102", "buy", List("APPL", "100")).freek[PRG]
+      _ <- UserAction("ID102", "buy", List("APPL", "200")).freek[PRG]
       _ <- Buy("APPL", 200).freek[PRG]
       _ <- Info("I'm going to trade even more smartly").freek[PRG]
       _ <- UserAction("ID102", "buy", List("MSFT", "100")).freek[PRG]
       _ <- Buy("MSFT", 100).freek[PRG]
-      _ <- UserAction("ID102", "sell", List("GOOG", "100")).freek[PRG]
+      _ <- UserAction("ID102", "sell", List("GOOG", "300")).freek[PRG]
       rsp <- Sell("GOOG", 300).freek[PRG]
       _ <- SystemAction("BACKOFFICE", "tradesCheck", List("ID102", "lastTrades")).freek[PRG]
       _ <- Error("Wait, what?!").freek[PRG]

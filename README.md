@@ -8,7 +8,7 @@ This is an exercise to play around with Free Monad to understand better the conc
  
 The following links sources been used to document myself on Free Monad, and may help you understand the concept better:
 
-* Cats definition (very good explanation): http://typelevel.org/cats/tut/freemonad.html
+* Cats definition (very good explanation): http://typelevel.org/cats/datatypes/freemonad.html
 * Free Monad technical explanation: http://okmij.org/ftp/Computation/free-monad.html
 * Tim Perrett's blog post (uses Scalaz): http://timperrett.com/2013/11/21/free-monads-part-1/
 * Underscore post by Noel Welsh: http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html
@@ -21,7 +21,7 @@ The following links sources been used to document myself on Free Monad, and may 
 
 Project created using [sbt-fresh](https://github.com/sbt/sbt-fresh)
 
-[Cats](https://github.com/typelevel/cats) library used for its [Free Monad](http://typelevel.org/cats/tut/freemonad.html) implementation
+[Cats](https://github.com/typelevel/cats) library used for its [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html) implementation
 
 [FreeK](https://github.com/ProjectSeptemberInc/freek) library to implement an example of Free Monads using this library 
 
